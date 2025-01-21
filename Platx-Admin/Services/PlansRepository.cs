@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Platx_Admin.DbContexts;
 using Platx_Admin.Entities;
 using Platx_Admin.Models;
+using System.Numerics;
 
 namespace Platx_Admin.Services
 {
@@ -28,9 +29,8 @@ namespace Platx_Admin.Services
             {
                 return await _context.Plans.OrderBy(p => p.Name).ToListAsync();
             }
-
-
         }
+
         public async Task<Plan?> GetPlanAsync(int planId, bool includePlanFeatures)
         {
             if (includePlanFeatures)
@@ -47,6 +47,19 @@ namespace Platx_Admin.Services
                    .FirstOrDefaultAsync();
             }
         }
+        public void CreatePlan(Plan plan)
+        {
+            if (plan != null)
+            {
+                _context.Plans.Add(plan);
+            }
+        }
+
+        public void DeletePlan(Plan plan)
+        {
+            _context.Plans.Remove(plan);
+        }
+
         public async Task<bool> PlanExistAsync(int planId)
         {
             return await _context.Plans.AnyAsync(p => p.Id == planId);
@@ -54,7 +67,6 @@ namespace Platx_Admin.Services
 
         public async Task<IEnumerable<PlanFeature>> GetPlanFeaturesAsync(int planId)
         {
-
 
             return await _context.PlanFeatures
                    .Where(f => f.PlanId == planId)
@@ -76,10 +88,16 @@ namespace Platx_Admin.Services
             }
 
         }
+        public void DeletePlanFeatureAsync(PlanFeature planFeature)
+        {
+            _context.PlanFeatures.Remove(planFeature);
+        }
+
         public async Task<bool> SaveChangesAsync()
         {
             return (await _context.SaveChangesAsync() >= 0);
         }
 
+       
     }
 }

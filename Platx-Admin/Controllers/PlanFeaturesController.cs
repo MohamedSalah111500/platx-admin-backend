@@ -97,59 +97,48 @@ namespace Platx_Admin.Controllers
 
         }
 
-        //[HttpPut("{planFeatureId}")]
-        //public ActionResult<PlanFeatureDto> UpdatePlanFeature(int planId, int planFeatureId, PlanFeatureForUpdateDto planFeature)
-        //{
-        //    //@TODO check if plan exist 
-        //    var feature = planFeatuers.FirstOrDefault<PlanFeatureDto>();
-        //    if (feature == null)
-        //    {
-        //        return NotFound();
-        //    }
-        //    feature.Content = planFeature.Content;
+        [HttpPut("{planFeatureId}")]
+        public async Task<ActionResult<PlanFeatureDto>> UpdatePlanFeature(int planId, int planFeatureId, PlanFeatureForUpdateDto planFeature)
+        {
+            if (!await _plansRepository.PlanExistAsync(planId))
+            {
+                throw new NotFoundException($"Plan with this id: {planId} not found.");
+            }
 
-        //    return Ok(feature);
+            var planFeatureEntity = await _plansRepository.GetPlanFeatureAsync(planId, planFeatureId);
+            if (planFeatureEntity == null)
+            {
+                throw new NotFoundException($"Plan Feature with this id: {planFeatureId} not found.");
+            }
 
-        //}
+            _mapper.Map(planFeature, planFeatureEntity);
 
-        //[HttpPatch("{planFeatureId}")]
-        //public ActionResult<PlanFeatureDto> PartiallyUpdatePlanFeature(int planId, int planFeatureId,
-        //    JsonPatchDocument<PlanFeatureForUpdateDto> patchDocument)
-        //{
-        //    //@TODO check if plan exist 
-        //    var feature = planFeatuers.FirstOrDefault<PlanFeatureDto>();
-        //    if (feature == null)
-        //    {
-        //        return NotFound();
-        //    }
-        //    var planFeatureToPatch = new PlanFeatureForUpdateDto()
-        //    {
-        //        Content = "new content"
-        //    };
-        //    patchDocument.ApplyTo(planFeatureToPatch, ModelState);
+            await _plansRepository.SaveChangesAsync();
 
-        //    if (!ModelState.IsValid)
-        //    {
-        //        return BadRequest();
-        //    }
+            return Ok(planFeatureEntity);
 
-        //    return Ok(feature);
+        }
 
-        //}
+        [HttpDelete("{planFeatureId}")]
+        public async Task<ActionResult<PlanFeatureDto>> DeletePlanFeature(int planId,  int planFeatureId)
+        {
+            if (!await _plansRepository.PlanExistAsync(planId))
+            {
+                throw new NotFoundException($"Plan with this id: {planId} not found.");
+            }
 
+            var planFeatureEntity = await _plansRepository.GetPlanFeatureAsync(planId, planFeatureId);
+            if (planFeatureEntity == null)
+            {
+                throw new NotFoundException($"Plan Feature with this id: {planFeatureId} not found.");
+            }
 
-        //[HttpDelete("{planFeatureId}")]
-        //public ActionResult<PlanFeatureDto> DeletePlanFeature(int planFeatureId)
-        //{
-        //    //@TODO check if plan exist 
-        //    var planFeature = planFeatuers.FirstOrDefault<PlanFeatureDto>();
-        //    if (planFeature == null)
-        //    {
-        //        return NotFound();
-        //    }
-        //    return NoContent();
+            _plansRepository.DeletePlanFeatureAsync(planFeatureEntity);
+            await _plansRepository.SaveChangesAsync();
 
-        //}
+            return NoContent();
+
+        }
 
     }
 }

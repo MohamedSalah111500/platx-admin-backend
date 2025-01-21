@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Platx_Admin.Entities;
 using Platx_Admin.Models;
 using Platx_Admin.Services;
 using Platx_Admin.Shared.Exceptions;
@@ -43,19 +44,69 @@ namespace Platx_Admin.Controllers
             }
         }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<PlanDto>> GetPlan(int id, [FromQuery] bool includePlanFeatures)
+        [HttpGet("{planId}")]
+        public async Task<ActionResult<PlanDto>> GetPlan(int planId, [FromQuery] bool includePlanFeatures)
         {
-            var planEntity = await _plansRepository.GetPlanAsync(id, includePlanFeatures);
+            var planEntity = await _plansRepository.GetPlanAsync(planId, includePlanFeatures);
 
             if (planEntity == null)
             {
-                throw new NotFoundException($"Plan with ID {id} was not found.");
+                throw new NotFoundException($"Plan with ID {planId} was not found.");
             }
             return Ok(_mapper.Map<PlanWithPlanFeatureDto>(planEntity));
 
         }
 
+        [HttpPost]
+        public async Task<ActionResult<PlanDto>> CreatePlan(PlanForCreationDto plan)
+        {
+
+            var finalPlan = _mapper.Map<Entities.Plan>(plan);
+
+            _plansRepository.CreatePlan(finalPlan);
+
+            await _plansRepository.SaveChangesAsync();
+
+            var createdPlanToReturn = _mapper.Map<Models.PlanDto>(finalPlan);
+
+            return Ok(createdPlanToReturn);
+
+        }
+
+        [HttpPut("{planId}")]
+        public async Task<ActionResult<PlanFeatureDto>> UpdatePlanFeature(int planId, PlanForUpdateDto plan)
+        {
+
+            var planEntity = await _plansRepository.GetPlanAsync(planId, false);
+
+            if (planEntity == null)
+            {
+                throw new NotFoundException($"Plan with this id: {planId} not found.");
+            }
+
+            _mapper.Map(plan, planEntity);
+
+            await _plansRepository.SaveChangesAsync();
+
+            return Ok(planEntity);
+        }
+
+        [HttpDelete("{planId}")]
+        public async Task<ActionResult<PlanFeatureDto>> DeletePlanFeature(int planId)
+        {
+            var planEntity = await _plansRepository.GetPlanAsync(planId, false);
+
+            if (planEntity == null)
+            {
+                throw new NotFoundException($"Plan with this id: {planId} not found.");
+            }
+
+            _plansRepository.DeletePlan(planEntity);
+            await _plansRepository.SaveChangesAsync();
+
+            return NoContent();
+
+        }
 
     }
 }

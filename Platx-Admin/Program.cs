@@ -30,6 +30,15 @@ builder.Services.AddProblemDetails(options =>
 
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", builder =>
+    {
+        builder.AllowAnyOrigin()
+               .AllowAnyMethod()
+               .AllowAnyHeader();
+    });
+});
 
 #if DEBUG
 builder.Services.AddTransient<IMailServices, LocalMailServices>();
@@ -56,6 +65,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 // handle not found exception.
+app.UseCors("AllowAll");
 
 app.Use(async (context, next) =>
 {

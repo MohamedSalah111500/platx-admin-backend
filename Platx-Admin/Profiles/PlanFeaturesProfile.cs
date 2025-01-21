@@ -11,6 +11,8 @@ namespace Platx_Admin.Profiles
             CreateMap<Entities.PlanFeature, Models.PlanFeatureDto>();
             CreateMap<Entities.PlanFeature, Models.PlanFeatureDto>();
             CreateMap<Models.PlanFeatureForCreationDto , Entities.PlanFeature>();
+            CreateMap<Models.PlanFeatureForUpdateDto, Entities.PlanFeature>();
+
 
         }
     }
